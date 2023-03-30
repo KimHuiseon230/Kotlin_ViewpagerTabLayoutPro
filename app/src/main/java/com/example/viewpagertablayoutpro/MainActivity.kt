@@ -9,43 +9,57 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import com.example.viewpagertablayoutpro.databinding.ActivityMainBinding
 import com.example.viewpagertablayoutpro.databinding.UsertabButtonBinding
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(){
     val binding: ActivityMainBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
     lateinit var customAdapter: CustomAdapter
-    lateinit var tabTitleLsit: MutableList<String>
+    lateinit var tabTitleList: MutableList<String>
     lateinit var toggle: ActionBarDrawerToggle
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
+        //+++ RecyclerView (Adapter setting) Start
         customAdapter = CustomAdapter(this)
-        customAdapter.addListFragment(OneFragment()) //  객체를 만듬
-        customAdapter.addListFragment(TwoFragment()) //  객체를 만듬 val tab1: TabLayout.Tab = binding.tabLayout.newTab()
-        customAdapter.addListFragment(ThreeFragment()) //  객체를 만듬
-        tabTitleLsit = mutableListOf("car", "house", "air")
+        customAdapter.addListFragment(OneFragment())
+        customAdapter.addListFragment(TwoFragment())    //val tab1: TabLayout.Tab = binding.tabLayout.newTab()
+        customAdapter.addListFragment(ThreeFragment())
+        tabTitleList = mutableListOf("car", "house", "air")
         binding.viewPager2.adapter = customAdapter
+        //+++ RecyclerView (Adapter setting) End
 
-        binding.navigationView.setNavigationItemSelectedListener(this)
-
-        //tabLayout 와 viewPager2를 연결
+        //+++ tabLayout 와 viewPager2를 연결  : binding.tabLayout.addTab(tab1)
         TabLayoutMediator(binding.tabLayout, binding.viewPager2) { tap, position ->
             // tab1.text ="FRAG1"
-            tap.text = tabTitleLsit.get(position)
+            tap.text = tabTitleList.get(position)
             tap.setCustomView(tabCustomView(position))
-        }.attach() // binding.tabLayout.addTab(tab1)
+        }.attach()
+        //+++ tabLayout 와 viewPager2 연결 End
 
         //1.액션 바 대신에 툴바로 대체.
         setSupportActionBar(binding.toolbar)
-        //2.ActionBarDrawerToggle 버튼 적용
-        toggle =ActionBarDrawerToggle(this, binding.drawerLayout,R.string.drawer_open,R.string.drawer_close)
-        //3.업 버튼 활성화
+        //2.(*중요*) ActionBarDrawerToggle 버튼 적용 : ( < - > 오른쪽과 왼쪽으로 화면을 움직임) // 반드시 String 사용
+        toggle = ActionBarDrawerToggle(this, binding.drawerLayout,R.string.drawer_open,R.string.drawer_close)
+        //3.Up button([<-] 모양) 활성화 : BackPress 기능을 담당. 이전 화면으로 돌아가는 기능 액션바에 만들어주는 기능.
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        //4. 토글 sync
+        //4.Up button --> toggle button sync
         toggle.syncState()
-    }
+
+        // +++ NavigationView 메뉴 항목을 클릭했을 때 이벤트 처리 Start
+        binding.navigationView.setNavigationItemSelectedListener(object : NavigationView.OnNavigationItemSelectedListener{
+            override fun onNavigationItemSelected(item: MenuItem): Boolean {
+                when (item.itemId) {
+                    R.id.item_user -> Toast.makeText(applicationContext,"User Data clicked",Toast.LENGTH_SHORT).show()
+                    R.id.item_info -> Toast.makeText(applicationContext,"App Data clicked",Toast.LENGTH_SHORT).show()
+                    R.id.item_age -> Toast.makeText(applicationContext,"User Age clicked",Toast.LENGTH_SHORT).show()
+                    R.id.item_email-> Toast.makeText(applicationContext,"User Email clicked",Toast.LENGTH_SHORT).show()
+                }
+                return false
+            }
+        }) // +++ NavigationView 메뉴 항목을 클릭했을 때 이벤트 처리 End
+    } //onCreate of end
 
     fun tabCustomView(position: Int): View {
         val binding = UsertabButtonBinding.inflate(layoutInflater) // 뷰 바인딩 진행 . 객체가 되었음.
@@ -54,27 +68,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             1 -> binding.ivICon.setImageResource(R.drawable.house)
             2 -> binding.ivICon.setImageResource(R.drawable.airport)
         }
-        binding.tvTabName.text = tabTitleLsit.get(position)
+        binding.tvTabName.text = tabTitleList.get(position)
         return binding.root
     }
-    // 메튜 토글 버튼을 눌렀을 때 네비게이션 바 활성화 < -- >
+    // 메뉴 토글 버튼을 눌렀을 때 네비게이션 바 활성화 < -- >
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        //toggle button push check
         if (toggle.onOptionsItemSelected(item)) {
             return true
         }
         return super.onOptionsItemSelected(item)
     }
+}//class MainActivity : AppCompatActivity() End
 
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
-            R.id.item_user -> Toast.makeText(this,"User Data clicked",Toast.LENGTH_SHORT).show()
-            R.id.item_info -> Toast.makeText(this,"App Data clicked",Toast.LENGTH_SHORT).show()
-            R.id.item_age-> Toast.makeText(this,"User Age clicked",Toast.LENGTH_SHORT).show()
-            R.id.item_email-> Toast.makeText(this,"User Email clicked",Toast.LENGTH_SHORT).show()
-        }
-        return false
-    }
-}
 /*  binding.viewPager2.orientation = ViewPager2.ORIENTATION_VERTICAL
 
         val tab1: TabLayout.Tab = binding.tabLayout.newTab()
